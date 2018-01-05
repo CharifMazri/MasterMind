@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Mastermind</title>
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ng-dialog/1.4.0/css/ngDialog.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ng-dialog/1.4.0/css/ngDialog-theme-default.min.css">
+</head>
+
+<body>
+
+  <div ng-app="masterApp" ng-controller="masterCtrl">
+
+    <div>
+      <svg height="100" width="100%"> <!--CPU-->
+                <g ng-repeat="pin in solution track by $index"
+                   ng-attr-transform="translate({{(($index) * 80)}},0)">
+                   <circle ng-if="gameEnd" cx="50" cy="50" r="40" stroke="black" stroke-width="3" ng-attr-fill="{{pin.color}}" />
+                   <circle ng-if="!gameEnd" cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="white" />
+                    <text ng-if="!gameEnd" x="40" y="60" font-family="Verdana" font-size="35">
+                        ?
+                    </text>
+                </g>
+        </svg>
+
+      <div ng-repeat="try in userSolutionStacks track by $index" style="display: flex;align-items: center;">
+        <svg height="100" ng-style="{'width': 90*try.solution.length}" >
+                  <g ng-repeat="pin in try.solution track by $index"
+                     ng-attr-transform="translate({{(($index) * 80)}},0)">
+                      <circle  cx="50" cy="50" r="40" stroke="black" stroke-width="3" ng-attr-fill="{{pin.color}}" />
+                  </g>
+              </svg>
+        <span style="font-size: 35px;">
+                {{try.correct}} | {{try.wrongPlace}} | {{$index + 1}} / {{rules.maxRound}}
+        </span>
+      </div>
+
+      <div>
+        <svg height="100" width="100%" ng-if="userSolutionStacks.length < rules.maxRound"> <!--USER STACK-->
+                    <g ng-repeat="pin in [].constructor(rules.traySize) track by $index"
+                       ng-attr-transform="translate({{(($index) * 80)}},0)">
+                        <circle ng-if="userCurrentSolution[$index]" cx="50" cy="50" r="40" stroke="black" stroke-width="3" ng-click="selectChoice($index)" ng-attr-fill="{{userCurrentSolution[$index].color}}" />
+                        <circle ng-if="!userCurrentSolution[$index]" cx="50" cy="50" r="40" stroke="black" stroke-width="3" fill="#FFFFFF" ng-click="selectChoice($index)"/>
+                    </g>
+                </svg>
+
+                <button type="button" ng-disabled="!canConfirm" ng-click="confirm();">Confirm</button>
+                <button ng-if="gameEnd" type="button" ng-click="retry();">Retry</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ng-dialog/1.4.0/js/ngDialog.min.js"></script>
+  <script src="mastermind.js"></script>
+</body>
+
+</html>
