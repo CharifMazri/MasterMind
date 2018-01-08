@@ -96,33 +96,40 @@ app.controller("masterCtrl", function($scope, ngDialog, $filter) {
         initGame();
     };
 
+    function getIndexByElement(pin, array) {
+        for (var x=0;x<array.length;x++) {
+            if (pin.id === array[x].id) {
+                return x;
+            }
+        }
+        return -1;
+    }
+
     $scope.confirm = function() {
 
-        var alreadyCorrect = [];
-        var alreadyPassed = [];
         var correct = 0;
         var wrongPlace = 0;
+        var solutionCopy = angular.copy($scope.solution);
+        var userSolutionCopy = angular.copy($scope.userCurrentSolution);
 
-        angular.forEach($scope.userCurrentSolution, function(value, key) {
-            if (value.id === $scope.solution[key].id) {
+        for (var x = 0;x < userSolutionCopy.length;x++) {
+            if (userSolutionCopy[x].id === solutionCopy[x].id) {
                 ++correct;
-                alreadyCorrect.push({position: key});
-                alreadyPassed.push($scope.solution[key])
+                solutionCopy = solutionCopy.filter(function(item, keyf) { return keyf !== x; });
+                userSolutionCopy = userSolutionCopy.filter(function(item, keyf) { return keyf !== x; });
+                --x;
             }
-        });
+        }
 
-        angular.forEach($scope.userCurrentSolution, function(value, key) {
-            if ($filter('filter')(alreadyCorrect, {position: key}).length === 0) {
-                for (var x = 0;x < $scope.solution.length;x++) {
-                    if ($filter('filter')(alreadyPassed, {id: value.id}).length === 0) {
-                        if (value.id === $scope.solution[x].id ) {
-                            alreadyPassed.push($scope.solution[x]);
-                            ++wrongPlace;
-                        }
-                    }
-                }
+        for (var x = 0;x < userSolutionCopy.length;x++) {
+            var solIndex;
+            if ((solIndex = getIndexByElement(userSolutionCopy[x], solutionCopy)) >= 0) {
+                solutionCopy = solutionCopy.filter(function(item, keyf) { return keyf !== solIndex; });
+                userSolutionCopy = userSolutionCopy.filter(function(item, keyf) { return keyf !== x; });
+                ++wrongPlace;
+                --x;
             }
-        });
+        }
 
         $scope.userSolutionStacks.push({
             solution: $scope.userCurrentSolution,
@@ -131,7 +138,6 @@ app.controller("masterCtrl", function($scope, ngDialog, $filter) {
         });
         $scope.userCurrentSolution = [];
         $scope.canConfirm = false;
-
 
         if (checkWin($scope.rules, correct)) {
             playerWin(true);
