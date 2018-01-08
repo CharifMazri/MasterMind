@@ -1,6 +1,6 @@
 var app = angular.module("masterApp", ['ngDialog']);
 
-app.controller("masterCtrl", function($scope, ngDialog) {
+app.controller("masterCtrl", function($scope, ngDialog, $filter) {
 
     $scope.gameEnd = false;
     $scope.solution = null;
@@ -68,27 +68,27 @@ app.controller("masterCtrl", function($scope, ngDialog) {
 
     function playerWin(status) {
         $scope.gameEnd = true;
-      var tmp = "";
-      if (status === true) {
-          tmp = "<div>Congratulations, you won in {{nbRounds}} rounds!</div>"
-      } else {
-          tmp = "<div>Sorry, you lost in {{nbRounds}} rounds!</div>"
-      }
+        var tmp = "";
+        if (status === true) {
+            tmp = "<div>Congratulations, you won in {{nbRounds}} rounds!</div>"
+        } else {
+            tmp = "<div>Sorry, you lost in {{nbRounds}} rounds!</div>"
+        }
 
-      ngDialog.open(
-          {
-              template: tmp,
-              plain: true,
-              className: 'ngdialog-theme-default',
-              controller: ['$scope', 'nbRounds', function($scope, nbRounds) {
-                  $scope.nbRounds = nbRounds;
-              }],
-              resolve: {
-                  nbRounds: function () {
-                      return $scope.userSolutionStacks.length;
-                  }
-              }
-          });
+        ngDialog.open(
+            {
+                template: tmp,
+                plain: true,
+                className: 'ngdialog-theme-default',
+                controller: ['$scope', 'nbRounds', function($scope, nbRounds) {
+                    $scope.nbRounds = nbRounds;
+                }],
+                resolve: {
+                    nbRounds: function () {
+                        return $scope.userSolutionStacks.length;
+                    }
+                }
+            });
 
     }
 
@@ -98,18 +98,24 @@ app.controller("masterCtrl", function($scope, ngDialog) {
 
     $scope.confirm = function() {
 
+        var alreadyPassed = [];
         var correct = 0;
         var wrongPlace = 0;
 
         angular.forEach($scope.userCurrentSolution, function(value, key) {
             if (value.id === $scope.solution[key].id) {
                 ++correct;
+                alreadyPassed.push($scope.solution[key]);
             } else {
-                for (var x = 0;x < $scope.solution.length;x++) {
-                    if (value.id === $scope.solution[x].id) {
-                        ++wrongPlace;
+                if ($filter('filter')(alreadyPassed, {id: value.id}).length === 0) {
+                    for (var x = 0;x < $scope.solution.length;x++) {
+                        if (value.id === $scope.solution[x].id) {
+                            alreadyPassed.push($scope.solution[x]);
+                            ++wrongPlace;
+                        }
                     }
                 }
+
             }
         });
 
