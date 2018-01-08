@@ -98,6 +98,7 @@ app.controller("masterCtrl", function($scope, ngDialog, $filter) {
 
     $scope.confirm = function() {
 
+        var alreadyCorrect = [];
         var alreadyPassed = [];
         var correct = 0;
         var wrongPlace = 0;
@@ -105,17 +106,21 @@ app.controller("masterCtrl", function($scope, ngDialog, $filter) {
         angular.forEach($scope.userCurrentSolution, function(value, key) {
             if (value.id === $scope.solution[key].id) {
                 ++correct;
-                alreadyPassed.push($scope.solution[key]);
-            } else {
-                if ($filter('filter')(alreadyPassed, {id: value.id}).length === 0) {
-                    for (var x = 0;x < $scope.solution.length;x++) {
-                        if (value.id === $scope.solution[x].id) {
+                alreadyCorrect.push({position: key});
+                alreadyPassed.push($scope.solution[key])
+            }
+        });
+
+        angular.forEach($scope.userCurrentSolution, function(value, key) {
+            if ($filter('filter')(alreadyCorrect, {position: key}).length === 0) {
+                for (var x = 0;x < $scope.solution.length;x++) {
+                    if ($filter('filter')(alreadyPassed, {id: value.id}).length === 0) {
+                        if (value.id === $scope.solution[x].id ) {
                             alreadyPassed.push($scope.solution[x]);
                             ++wrongPlace;
                         }
                     }
                 }
-
             }
         });
 
